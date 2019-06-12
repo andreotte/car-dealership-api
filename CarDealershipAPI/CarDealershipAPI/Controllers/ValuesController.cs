@@ -1,6 +1,7 @@
 ﻿using CarDealershipAPI.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -44,18 +45,64 @@ namespace CarDealershipAPI.Controllers
         }
 
         // POST api/values
-        public void Post([FromBody]string value)
+        public void Post(string make, string model, int year, string color)
         {
+            Car car = new Car();
+            car.Make = make;
+            car.Model = model;
+            car.Year = year;
+            car.Color = color;
+
+            db.Cars.AddOrUpdate(car);
+            db.SaveChanges();
         }
 
         // PUT api/values/5
-        public void Put(int id, [FromBody]string value)
+        public string Put(int id, string property, string value)
         {
+            Car car = db.Cars.Find(id);
+
+            if(car == null)
+            {
+                return $"That doesn't exist";
+            }
+            switch (property.ToLower())
+            {
+                case "make":
+                    car.Make = value;
+                    break;
+                case "model":
+                    car.Model = value;
+                    break;
+                case "color":
+                    car.Color = value;
+                    break;
+                case "year":
+                    car.Year = int.Parse(value);
+                    break;
+            }
+
+            db.Cars.AddOrUpdate(car);
+            db.SaveChanges();
+
+            return $"No car at id: {id}";
         }
 
         // DELETE api/values/5
-        public void Delete(int id)
+        public string Delete(int id)
         {
+            Car car = db.Cars.Find(id);
+            
+            if(car == null)
+            {
+                return "No car at that id";
+            }
+
+            db.Cars.Remove(car);
+            db.SaveChanges();
+
+            return $"Deleted car at id: {id}";
+
         }
     }
 }
